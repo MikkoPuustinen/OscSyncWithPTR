@@ -37,6 +37,7 @@ struct SynthVoice {
 
     void reset()
     {
+        isActive = false;
         note = 0;
         currentAngle = 0;
         angleDelta = 0;
@@ -75,7 +76,6 @@ public:
     //==============================================================================
     int getNumPrograms() override;
 
-    int findNote(int note);
     int getCurrentProgram() override;
     void setCurrentProgram (int index) override;
     const juce::String getProgramName (int index) override;

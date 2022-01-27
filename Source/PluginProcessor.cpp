@@ -197,13 +197,16 @@ void OscSyncAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce
                 inc++;
             }
         }
-        for (auto sample = 0; sample < buffer.getNumSamples(); ++sample)
+        if (!(voiceIndex == -1))
         {
             const float frequency = 440 * pow(2, (midiNote - 69) / 12.0f);
             voices[voiceIndex].updateAngle(frequency, sampleRate);
-            leftBuffer[sample]  += level * (2 * (std::fmod((voices[voiceIndex].currentAngle * frequency / sampleRate), 1)) - 1);
-            rightBuffer[sample] += level * (2 * (std::fmod((voices[voiceIndex].currentAngle * frequency / sampleRate), 1)) - 1);
-            voices[voiceIndex].increment();
+            for (auto sample = 0; sample < buffer.getNumSamples(); ++sample)
+            {
+                leftBuffer[sample]  += level * (2 * (std::fmod((voices[voiceIndex].currentAngle * frequency / sampleRate), 1)) - 1);
+                rightBuffer[sample] += level * (2 * (std::fmod((voices[voiceIndex].currentAngle * frequency / sampleRate), 1)) - 1);
+                voices[voiceIndex].increment();
+            }
         }
         
     }
@@ -249,6 +252,7 @@ void OscSyncAudioProcessor::setStateInformation (const void* data, int sizeInByt
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
 }
+
 
 //==============================================================================
 // This creates new instances of the plugin..
