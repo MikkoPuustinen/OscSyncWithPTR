@@ -3,7 +3,7 @@
 <JUCERPROJECT id="SAB3Ag" name="OscSync" projectType="audioplug" useAppConfig="0"
               addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1"
               pluginCharacteristicsValue="pluginIsSynth,pluginWantsMidiIn"
-              cppLanguageStandard="20">
+              cppLanguageStandard="20" pluginManufacturer="MTLabs">
   <MAINGROUP id="piu0JM" name="OscSync">
     <GROUP id="{870455DA-7890-7642-37B9-B63F6AFC7AA8}" name="Source">
       <FILE id="N2eqYS" name="PluginProcessor.cpp" compile="1" resource="0"
