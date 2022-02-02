@@ -19,18 +19,27 @@ OscSyncAudioProcessor::OscSyncAudioProcessor()
                       #endif
                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
                      #endif
-                       ), 
-    halfStep(std::exp(std::log(2) / 1200))
+                       ), parameters(*this, nullptr, juce::Identifier("OscSync"),
+                           {
+                               std::make_unique<juce::AudioParameterFloat>("syncFrequency",                                                     // parameterID
+                                                                           "Sync Frequency",                                                    // parameter name
+                                                                           juce::NormalisableRange(0.0f, 2400.0f, 1.0f),                        // range
+                                                                           0.0f),                                                               // default value
+                           })
 #endif
 {
     for (int i = 0; i < 10; i++)
     {
         voices.push_back(SynthVoice());
     }
+
+    syncFrequency = parameters.getRawParameterValue("syncFrequency");
+
 }
 
 OscSyncAudioProcessor::~OscSyncAudioProcessor()
 {
+
 }
 
 //==============================================================================
@@ -200,12 +209,13 @@ void OscSyncAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce
         if (!(voiceIndex == -1))
         {
             const float frequency = 440 * pow(2, (midiNote - 69) / 12.0f);
-            voices[voiceIndex].updateAngle(frequency, sampleRate);
+            
             for (auto sample = 0; sample < buffer.getNumSamples(); ++sample)
             {
-                leftBuffer[sample]  += level * (2 * (std::fmod((voices[voiceIndex].currentAngle * frequency / sampleRate), 1)) - 1);
-                rightBuffer[sample] += level * (2 * (std::fmod((voices[voiceIndex].currentAngle * frequency / sampleRate), 1)) - 1);
-                voices[voiceIndex].increment();
+                voices[voiceIndex].updateAngle(frequency, sampleRate, (float) * syncFrequency);
+                auto curr = voices[voiceIndex].synthesize();
+                leftBuffer[sample]  += level * curr;
+                rightBuffer[sample] += level * curr;
             }
         }
         
@@ -236,7 +246,7 @@ bool OscSyncAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* OscSyncAudioProcessor::createEditor()
 {
-    return new OscSyncAudioProcessorEditor (*this);
+    return new OscSyncAudioProcessorEditor (*this, parameters);
 }
 
 //==============================================================================

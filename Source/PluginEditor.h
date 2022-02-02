@@ -17,7 +17,8 @@
 class OscSyncAudioProcessorEditor  : public juce::AudioProcessorEditor
 {
 public:
-    OscSyncAudioProcessorEditor (OscSyncAudioProcessor&);
+    typedef juce::AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
+    OscSyncAudioProcessorEditor (OscSyncAudioProcessor&, juce::AudioProcessorValueTreeState&);
     ~OscSyncAudioProcessorEditor() override;
 
     //==============================================================================
@@ -28,6 +29,11 @@ private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
     OscSyncAudioProcessor& audioProcessor;
+
+    juce::AudioProcessorValueTreeState& valueTreeState;
+
+    juce::Slider syncFrequencySlider;
+    std::unique_ptr<SliderAttachment> syncFrequencyAttachment;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OscSyncAudioProcessorEditor)
 };

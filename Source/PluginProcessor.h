@@ -16,18 +16,42 @@
 struct SynthVoice {
     bool isActive = false;
     int note = 0;
-    double currentAngle = 0;
-    double angleDelta = 0;
+    int currentAngle = 0;
 
-    void updateAngle(double freq, double sampleRate) 
+    double frequency = 0;
+    double sampleRate = 0;
+    float syncFrequency = 0;
+    int syncAngle = 0;
+
+    void updateAngle(double freq, double sRate, float syncFreq) 
     {
-        auto cyclesPerSample = freq / sampleRate;
-        angleDelta = 1; //yclesPerSample * 2.0 * juce::MathConstants<double>::pi;
+        frequency = freq;
+        sampleRate = sRate;
+        syncFrequency = syncFreq;
     }
 
     void increment() 
     {
-        currentAngle += angleDelta;
+        float f1 = 2 * (std::fmod((currentAngle * frequency / sampleRate), 1)) - 1;
+        float nextSample = 2 * (std::fmod(((currentAngle + 1) * frequency / sampleRate), 1)) - 1;
+        float f2 = 2 * (std::fmod((syncAngle * syncFrequency / sampleRate), 1)) - 1;
+        float nextSample2 = 2 * (std::fmod(((syncAngle + 1) * syncFrequency / sampleRate), 1)) - 1;
+        if (nextSample < f1)
+        {
+            syncAngle = 0;
+        }
+        else if (nextSample2 < f2) 
+        {
+            syncAngle = 0;
+        }
+        else 
+        {
+
+        }
+        currentAngle++;
+
+        syncAngle++;
+        
     }
 
     void setNote(int midiNote)
@@ -35,12 +59,17 @@ struct SynthVoice {
         note = midiNote;
     }
 
+    float synthesize()
+    {
+        increment();
+        return (2 * (syncAngle * syncFrequency / sampleRate) - 1);
+    }
+
     void reset()
     {
         isActive = false;
         note = 0;
         currentAngle = 0;
-        angleDelta = 0;
     }
 };
 
@@ -93,6 +122,10 @@ private:
     SynthVoice voice;
     std::vector<SynthVoice> voices;
     double halfStep;
+
+
+    juce::AudioProcessorValueTreeState parameters;
+    std::atomic<float>* syncFrequency = nullptr;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OscSyncAudioProcessor)
 };
