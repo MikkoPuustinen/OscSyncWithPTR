@@ -18,6 +18,7 @@ class OscSyncAudioProcessorEditor  : public juce::AudioProcessorEditor
 {
 public:
     typedef juce::AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
+    typedef juce::AudioProcessorValueTreeState::ComboBoxAttachment ComboBoxAttachment;
     OscSyncAudioProcessorEditor (OscSyncAudioProcessor&, juce::AudioProcessorValueTreeState&);
     ~OscSyncAudioProcessorEditor() override;
 
@@ -34,6 +35,9 @@ private:
 
     juce::Slider syncFrequencySlider;
     std::unique_ptr<SliderAttachment> syncFrequencyAttachment;
+
+    juce::ComboBox polynomialCombo;
+    std::unique_ptr<ComboBoxAttachment> polynomialComboAttachment;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OscSyncAudioProcessorEditor)
 };

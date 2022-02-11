@@ -23,6 +23,13 @@ OscSyncAudioProcessorEditor::OscSyncAudioProcessorEditor (OscSyncAudioProcessor&
     syncFrequencySlider.setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxBelow, false, 50, 20);
     addAndMakeVisible(syncFrequencySlider);
     syncFrequencyAttachment.reset(new SliderAttachment(valueTreeState, "syncFrequency", syncFrequencySlider));
+
+    polynomialCombo.addItem("no polynomial", 1);
+    polynomialCombo.addItem("w = 1", 2);
+    polynomialCombo.addItem("w = 2", 3);
+    polynomialCombo.addItem("w = 3", 4);
+    polynomialComboAttachment.reset(new ComboBoxAttachment(valueTreeState, "polynomial", polynomialCombo));
+    addAndMakeVisible(polynomialCombo);
 }
 
 OscSyncAudioProcessorEditor::~OscSyncAudioProcessorEditor()
@@ -42,6 +49,5 @@ void OscSyncAudioProcessorEditor::paint (juce::Graphics& g)
 void OscSyncAudioProcessorEditor::resized()
 {
     syncFrequencySlider.setBounds(40, getHeight() - 180, 60, 80);
-    // This is generally where you'll want to lay out the positions of any
-    // subcomponents in your editor..
+    polynomialCombo.setBounds(getWidth() - 250, getHeight() - 100, 150, 25);
 }

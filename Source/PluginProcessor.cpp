@@ -20,12 +20,13 @@ OscSyncAudioProcessor::OscSyncAudioProcessor()
                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
                      #endif
                        ), parameters(*this, nullptr, juce::Identifier("OscSync"),
-                           {
-                               std::make_unique<juce::AudioParameterFloat>("syncFrequency",                                                     // parameterID
-                                                                           "Sync Frequency",                                                    // parameter name
-                                                                           juce::NormalisableRange(0.0f, 2400.0f, 1.0f),                        // range
-                                                                           0.0f),                                                               // default value
-                           })
+                        {
+                            std::make_unique<juce::AudioParameterFloat>("syncFrequency",                                                     // parameterID
+                                                                        "Sync Frequency",                                                    // parameter name
+                                                                        juce::NormalisableRange(0.0f, 2400.0f, 1.0f),                        // range
+                                                                        0.0f),                                                               // default value
+                            std::make_unique<juce::AudioParameterInt>("polynomial"   ,"Polynomial"   ,  0     ,     3 ,        0),
+                        })
 #endif
 {
     for (int i = 0; i < 10; i++)
@@ -34,6 +35,7 @@ OscSyncAudioProcessor::OscSyncAudioProcessor()
     }
 
     syncFrequency = parameters.getRawParameterValue("syncFrequency");
+    polynomial = parameters.getRawParameterValue("polynomial");
 
 }
 
@@ -181,6 +183,7 @@ void OscSyncAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce
     auto* leftBuffer  = buffer.getWritePointer(0);
     auto* rightBuffer = buffer.getWritePointer(1);
 
+
     for (int i = 0; i < activeNotes.size(); i++)
     {
         const int midiNote = activeNotes[i][0];
@@ -212,8 +215,9 @@ void OscSyncAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce
             
             for (auto sample = 0; sample < buffer.getNumSamples(); ++sample)
             {
-                voices[voiceIndex].updateAngle(frequency, sampleRate, (float) * syncFrequency);
-                auto curr = voices[voiceIndex].synthesize();
+                float s = frequency * pow(2, ((float)*syncFrequency / 1200));
+                voices[voiceIndex].updateAngle(frequency, sampleRate, s, *polynomial);
+                auto curr = voices[voiceIndex].increment();
                 leftBuffer[sample]  += level * curr;
                 rightBuffer[sample] += level * curr;
             }
