@@ -82,6 +82,26 @@ double OscSyncAudioProcessor::getTailLengthSeconds() const
     return 0.0;
 }
 
+double OscSyncAudioProcessor::getSampleRate()
+{
+    return sampleRate;
+}
+
+int* OscSyncAudioProcessor::getActiveMidiNotes()
+{
+    return activeMidiNotes;
+}
+
+std::atomic<float>* OscSyncAudioProcessor::getPolynomial()
+{
+    return polynomial;
+}
+
+std::atomic<float>* OscSyncAudioProcessor::getSyncFrequency()
+{
+    return syncFrequency;
+}
+
 int OscSyncAudioProcessor::getNumPrograms()
 {
     return 1;   // NB: some hosts don't cope very well if you tell them there are 0 programs,
