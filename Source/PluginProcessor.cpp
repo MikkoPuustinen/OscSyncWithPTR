@@ -26,6 +26,8 @@ OscSyncAudioProcessor::OscSyncAudioProcessor()
                                                                         juce::NormalisableRange(0.0f, 2400.0f, 1.0f),                        // range
                                                                         0.0f),                                                               // default value
                             std::make_unique<juce::AudioParameterInt>("polynomial"   ,"Polynomial"   ,  0     ,     3 ,        0),
+                            std::make_unique<juce::AudioParameterFloat>("toneGenerator"   ,"ToneGenerator"    ,  juce::NormalisableRange(20.0f, 4000.0f, 1.0f, 0.3f, false) ,     100.0f),
+                            std::make_unique<juce::AudioParameterBool>("toneGeneratorOn"   ,"ToneGeneratorOn"    ,  false)
                         })
 #endif
 {
@@ -33,9 +35,12 @@ OscSyncAudioProcessor::OscSyncAudioProcessor()
     {
         voices.push_back(SynthVoice());
     }
+    voice = SynthVoice();
 
     syncFrequency = parameters.getRawParameterValue("syncFrequency");
     polynomial = parameters.getRawParameterValue("polynomial");
+    toneGenerator = parameters.getRawParameterValue("toneGenerator");
+    toneGeneratorOn = parameters.getRawParameterValue("toneGeneratorOn");
 
 }
 
@@ -100,6 +105,16 @@ std::atomic<float>* OscSyncAudioProcessor::getPolynomial()
 std::atomic<float>* OscSyncAudioProcessor::getSyncFrequency()
 {
     return syncFrequency;
+}
+
+std::atomic<float>* OscSyncAudioProcessor::getToneGeneratorStatus()
+{
+    return toneGeneratorOn;
+}
+
+std::atomic<float>* OscSyncAudioProcessor::getToneGeneratorFrequency()
+{
+    return toneGenerator;
 }
 
 int OscSyncAudioProcessor::getNumPrograms()
@@ -202,6 +217,7 @@ void OscSyncAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce
     auto level = 0.125f;
     auto* leftBuffer  = buffer.getWritePointer(0);
     auto* rightBuffer = buffer.getWritePointer(1);
+    bool isON = (bool)*toneGeneratorOn;
 
 
     for (int i = 0; i < activeNotes.size(); i++)
@@ -243,6 +259,27 @@ void OscSyncAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce
             }
         }
         
+    }
+
+    if (isON)
+    {
+        const float frequency = (float)*toneGenerator;
+        float s = frequency * pow(2, ((float)*syncFrequency / 1200));
+        if (!(frequency == voice.prevFreq))
+        {
+            voice.reset(); // hack, for some reason D gets very high values when the frequency changes and gives huge peaks
+        }
+        voice.updateAngle(frequency, sampleRate, s, *polynomial);
+
+        for (auto sample = 0; sample < buffer.getNumSamples(); ++sample)
+        {
+            auto curr = voice.increment();
+            leftBuffer[sample] += level * curr;
+            rightBuffer[sample] += level * curr;
+        }
+    }
+    else {
+        voice.reset();
     }
 
     for (int i = 0; i < voices.size(); i++)

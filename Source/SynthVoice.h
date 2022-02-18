@@ -25,11 +25,12 @@ struct SynthVoice {
     float plus = 0;
 
     float r = 0;
-
+    float prevFreq = 0;
 
     void updateAngle(double freq, double sRate, float syncFreq, int polynomial)
     {
         frequency = freq;
+        prevFreq = freq;
         sampleRate = sRate;
         syncFrequency = syncFreq;
         W = polynomial;
@@ -60,14 +61,23 @@ struct SynthVoice {
             plus = r * phi;
         }
 
-        const float slavePhi = (std::fmod(syncAngle * sT0, 1)) + plus;
+        const float slavePhi = (std::fmod(syncAngle * sT0 + plus, 1));
         const float sample = 2 * slavePhi - 1;
 
-        const float D = slavePhi * sP0;
+        float D = slavePhi * sP0;
+
+        //if (D > 3)
+        //{
+        //    D = 3;
+        //}
 
         float  h = 1;
 
-        if (!(std::fmod(r, 1) == 0))
+        if ((std::fmod(r, 1) == 0) || phi >= W * T0)
+        {
+            h = 1;
+        }
+        else
         {
             h = r - floor(r);
         }
@@ -168,6 +178,12 @@ struct SynthVoice {
     void setNote(int midiNote)
     {
         note = midiNote;
+    }
+
+    void setStart(int sample)
+    {
+        currentAngle = sample;
+        syncAngle = sample;
     }
 
     void reset()

@@ -6,6 +6,8 @@
               cppLanguageStandard="20" pluginManufacturer="MTLabs">
   <MAINGROUP id="piu0JM" name="OscSync">
     <GROUP id="{870455DA-7890-7642-37B9-B63F6AFC7AA8}" name="Source">
+      <FILE id="uFYOrJ" name="LookAndFeel.cpp" compile="1" resource="0" file="Source/LookAndFeel.cpp"/>
+      <FILE id="v5PIV4" name="LookAndFeel.h" compile="0" resource="0" file="Source/LookAndFeel.h"/>
       <FILE id="N2eqYS" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>
       <FILE id="e1ufHl" name="PluginProcessor.h" compile="0" resource="0"

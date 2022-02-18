@@ -49,6 +49,10 @@ public:
 
     std::atomic<float>* getSyncFrequency();
 
+    std::atomic<float>* getToneGeneratorStatus();
+
+    std::atomic<float>* getToneGeneratorFrequency();
+
     //==============================================================================
     int getNumPrograms() override;
 
@@ -70,13 +74,16 @@ private:
     std::vector<SynthVoice> voices;
     double halfStep;
 
-
     juce::AudioProcessorValueTreeState parameters;
 
 
     std::atomic<float>* syncFrequency = nullptr;
 
     std::atomic<float>* polynomial = nullptr;
+
+    std::atomic<float>* toneGenerator = nullptr;
+
+    std::atomic<float>* toneGeneratorOn = nullptr;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OscSyncAudioProcessor)
 };
