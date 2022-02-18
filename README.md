@@ -1,6 +1,6 @@
 # OscSyncWithPTR
 
-A simple sawtooth synthesizer with hard sync capabilities. Made for demonstrating the method proposed in Reducing Aliasing from Synthetic Audio Signals Using Polynomial Transition Regions (Kleimola & Välimäki, 2012).
+A simple sawtooth synthesizer with hard sync capabilities. Made for demonstrating the method proposed in *Reducing Aliasing from Synthetic Audio Signals Using Polynomial Transition Regions (Kleimola & Välimäki, 2012)*.
 
 ## Setup
 
