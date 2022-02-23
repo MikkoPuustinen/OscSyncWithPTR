@@ -12,7 +12,7 @@ struct SynthVoice {
     double sampleRate = 0;
     float syncFrequency = 0;
     int syncAngle = 1;
-    int W = 0;
+    int polynomial = 0;
 
     float T0 = 0;
     float P0 = 0;
@@ -27,13 +27,16 @@ struct SynthVoice {
     float r = 0;
     float prevFreq = 0;
 
-    void updateAngle(double freq, double sRate, float syncFreq, int polynomial)
+    float slaveSamples = 0;
+    float masterSamples = 0;
+
+    void updateAngle(double freq, double sRate, float syncFreq, int p)
     {
         frequency = freq;
         prevFreq = freq;
         sampleRate = sRate;
         syncFrequency = syncFreq;
-        W = polynomial;
+        polynomial = p;
 
         T0 = frequency / sampleRate;
         P0 = 1 / T0;
@@ -41,9 +44,10 @@ struct SynthVoice {
         sT0 = syncFrequency / sampleRate;
         sP0 = 1 / sT0;
 
-        cdc = W * sT0;
-
         r = syncFrequency / frequency;
+
+        slaveSamples = sampleRate / syncFrequency;
+        masterSamples = sampleRate / frequency;
 
     }
 
@@ -52,10 +56,11 @@ struct SynthVoice {
         currentAngle++;
 
         syncAngle++;
+        int W = 0;
 
         const float phi = (std::fmod(currentAngle * T0, 1));
 
-        if (phi < T0)
+        if (!(currentAngle < 3) && phi < T0)
         {
             syncAngle = 0;
             plus = r * phi;
@@ -66,12 +71,36 @@ struct SynthVoice {
 
         float D = slavePhi * sP0;
 
-        //if (D > 3)
-        //{
-        //    D = 3;
-        //}
 
         float  h = 1;
+
+
+        if (polynomial > 0 && !(frequency == syncFrequency))
+        {
+            if (std::abs(slaveSamples - masterSamples) < 1) 
+            {
+                W = 1;
+            }
+            else if (std::abs(slaveSamples - masterSamples) < 2)
+            {
+                W = 1;
+            }
+            else if (std::abs(slaveSamples - masterSamples) < 3)
+            {
+                W = 2;
+            }
+            else 
+            {
+                W = polynomial;
+            }
+        } 
+        else
+        {
+            W = polynomial;
+        }
+        
+
+        cdc = W * sT0;
 
         if ((std::fmod(r, 1) == 0) || phi >= W * T0)
         {
@@ -81,7 +110,6 @@ struct SynthVoice {
         {
             h = r - floor(r);
         }
-
 
         switch (W)
         {
@@ -106,6 +134,10 @@ struct SynthVoice {
 
     float getOnePol(float master, float slave, float sample, float D, float h)
     {
+        if (std::abs(slaveSamples - masterSamples) < 1)
+        {
+           // h = 1;
+        }
         if (master < 1 * T0)
         {
             return ((2 * sT0 - 2 * h) * D + 2 * h - 1) - cdc;
@@ -114,10 +146,7 @@ struct SynthVoice {
         {
             return ((2 * sT0 - 2 * h) * D + 2 * h - 1) - cdc;
         }
-        else
-        {
-            return sample - cdc;
-        }
+        return sample - cdc;
     }
 
     float getTwoPol(float master, float slave, float sample, float D, float h)
@@ -139,16 +168,16 @@ struct SynthVoice {
         {
             return  h * pow(D, 2) + (2 * sT0 - 4 * h) * D + 4 * h - 1 - cdc;
         }
-        else {
-            return  sample - cdc;
-        }
+        return  sample - cdc;
 
     }
 
     float getThreePol(float master, float slave, float sample, float D, float h)
     {
         if (master < T0)
+        {
             return -h * pow(D, 3) / 3 + 2 * sT0 * D + 2 * h - 1 - cdc;
+        }
         else if (master < 2 * T0)
         {
             return 2 * h * pow(D, 3) / 3 - 3 * h * pow(D, 2) + (2 * sT0 + 3 * h) * D + h - 1 - cdc;
@@ -169,10 +198,7 @@ struct SynthVoice {
         {
             return -h * pow(D, 3) / 3 + 3 * h * pow(D, 2) + (2 * sT0 - 9 * h) * D + 9 * h - 1 - cdc;
         }
-        else
-        {
-            return sample - cdc;
-        }
+        return sample - cdc;
     }
 
     void setNote(int midiNote)

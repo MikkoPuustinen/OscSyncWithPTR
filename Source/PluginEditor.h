@@ -95,7 +95,6 @@ public:
             {
                 signal[j] += voice.increment();
             }
-
         }
 
         juce::Path path;
@@ -103,7 +102,7 @@ public:
 
         for (int i = 1; i < signal.size() - 500; i++)
         {
-            const int index = i + 500;
+            const int index = i;
             path.lineTo(i * zoom, 0.18f * ((getHeight() * -1 * signal[index]) / 2) + (getHeight() / 2));
             if (zoom > 5.0f)
             {
