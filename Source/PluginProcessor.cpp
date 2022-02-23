@@ -185,6 +185,10 @@ bool OscSyncAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) 
 
 void OscSyncAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
+    for (int i = 0; i < buffer.getNumChannels(); ++i)
+        buffer.clear(i, 0, buffer.getNumSamples());
+    
+    
     juce::ScopedNoDenormals noDenormals;
     auto totalNumInputChannels  = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
